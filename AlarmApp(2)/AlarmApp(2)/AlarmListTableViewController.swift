@@ -8,29 +8,26 @@
 
 import UIKit
 
-class AlarmListTableViewController: UITableViewController, SwitchTableViewCellDelegate {
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
+class AlarmListTableViewController: UITableViewController, SwitchTableViewCellDelegate, AlarmScheduler {
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        tableView.reloadData()
     }
     
-
     // MARK: - TableViewDataSource
-
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return AlarmController.sharedController.alarms.count
     }
-
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "alarmCell", for: indexPath) as? SwitchTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "alarmCell", for: indexPath) as? SwitchTableViewCell ?? SwitchTableViewCell()
         
-        let alarm = AlarmController.sharedController.alarms[indexPath.row]
-        cell?.timeLabel.text = alarm.name
-        cell?.timeLabel.text = alarm.fireTimeAsString
-        cell?.alarmSwitch.isOn = alarm.enabled
-
-        return cell ?? UITableViewCell()
+        cell.alarm = AlarmController.sharedController.alarms[indexPath.row]
+        cell.delegate = self
+        
+        return cell
     }
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
@@ -46,19 +43,26 @@ class AlarmListTableViewController: UITableViewController, SwitchTableViewCellDe
     // MARK: - SwitchTableViewCellDelegate
     
     func switchCellSwitchValueChanged(cell: SwitchTableViewCell) {
-        guard let alarm = cell.alarm else { return }
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        let alarm = AlarmController.sharedController.alarms[indexPath.row]
         AlarmController.sharedController.toggleEnabled(for: alarm)
         
-        tableView.reloadData() 
+        if alarm.enabled {
+            scheduleUserNotification(for: alarm)
+        } else {
+            cancelUserNotifications(for: alarm)
+        }
+        
+        tableView.reloadRows(at: [indexPath], with: .automatic)
     }
-
+    
     // MARK: - Navigation
-
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "toAlarmDetail" {
-           guard let detailVC = segue.destination as? AlarmDetailTableViewController,
-            let indexPath = tableView.indexPathForSelectedRow else { return }
-            detailVC.alarm = AlarmController.sharedController.alarms[indexPath.row] 
+            guard let detailVC = segue.destination as? AlarmDetailTableViewController,
+                let indexPath = tableView.indexPathForSelectedRow else { return }
+            detailVC.alarm = AlarmController.sharedController.alarms[indexPath.row]
         } 
     }
 }

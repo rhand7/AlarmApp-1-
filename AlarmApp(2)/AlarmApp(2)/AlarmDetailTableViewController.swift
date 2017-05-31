@@ -8,11 +8,11 @@
 
 import UIKit
 
-class AlarmDetailTableViewController: UITableViewController {
+class AlarmDetailTableViewController: UITableViewController, AlarmScheduler {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        updateViews() 
     }
     
     // MARK: - Properties 
@@ -36,21 +36,25 @@ class AlarmDetailTableViewController: UITableViewController {
         let timeIntervalSinceMidnight = datePicker.date.timeIntervalSince(thisMorningAtMidnight)
         if let alarm = alarm {
             AlarmController.sharedController.updateAlarm(alarm: alarm, fireTimeFromMidnight: timeIntervalSinceMidnight, name: name)
+            cancelUserNotifications(for: alarm)
+            scheduleUserNotification(for: alarm) 
         } else {
             let alarm = AlarmController.sharedController.addAlarm(fireTimeFromMidnight: timeIntervalSinceMidnight, name: name)
             self.alarm = alarm
+            scheduleUserNotification(for: alarm)
         }
         let _ = navigationController?.popViewController(animated: true)
     }
     @IBAction func enableButtonTapped(_ sender: Any) {
         guard let alarm = alarm else { return }
         AlarmController.sharedController.toggleEnabled(for: alarm)
+        if alarm.enabled {
+            scheduleUserNotification(for: alarm)
+        } else {
+            cancelUserNotifications(for: alarm)
+        }
         updateViews() 
     }
-    
-    
-    
-
     
     // MARK: - private
     private func updateViews() {

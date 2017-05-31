@@ -65,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				2AACFCB31EDE03B60015F4F9 /* AppDelegate.swift */,
+				2AACFCD31EDE0E0C0015F4F9 /* DateHelper.swift */,
 				2AACFCC91EDE04C00015F4F9 /* Storyboards */,
 				2AACFCC61EDE03E80015F4F9 /* Models */,
 				2AACFCC71EDE03EE0015F4F9 /* ModelControllers */,
@@ -89,7 +90,6 @@
 			isa = PBXGroup;
 			children = (
 				2AACFCD11EDE0DE10015F4F9 /* Alarm.swift */,
-				2AACFCD31EDE0E0C0015F4F9 /* DateHelper.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
